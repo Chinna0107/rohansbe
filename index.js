@@ -4,9 +4,25 @@ const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const sliderRoutes = require('./routes/sliderRoutes');
-const app = express();
-const PORT = 3000;
+// const app = express();
+// const PORT = 3000;
 
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:3000",
+      "https://cmsupermart.vercel.app",
+      "https://cmsupermart-git-main-chinna0107s-projects.vercel.app"
+    ],
+    credentials: true,
+  })
+);
 app.use(cors());
 app.use(express.json());
 app.use('/api/users', userRoutes);
