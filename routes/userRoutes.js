@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const sql = require('../config/db');
+const pool = require('../config/db');
 const router = express.Router();
 
 // Register route
@@ -8,15 +8,14 @@ router.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    const result = await sql`
-      INSERT INTO users (email, password)
-      VALUES (${email}, ${password})
-      RETURNING id, email, created_at
-    `;
+    const result = await pool.query(
+      'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email, created_at',
+      [email, password]
+    );
     
-    const token = jwt.sign({ id: result[0].id, email: result[0].email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: result.rows[0].id, email: result.rows[0].email }, process.env.JWT_SECRET, { expiresIn: '7d' });
     
-    res.status(201).json({ success: true, message: 'User registered', user: result[0], token });
+    res.status(201).json({ success: true, message: 'User registered', user: result.rows[0], token });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -31,13 +30,13 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    const users = await sql`SELECT * FROM users WHERE email = ${email} AND password = ${password}`;
+    const result = await pool.query('SELECT * FROM users WHERE email = $1 AND password = $2', [email, password]);
     
-    if (users.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(401).json({ message: 'User not found.' });
     }
     
-    const user = users[0];
+    const user = result.rows[0];
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,

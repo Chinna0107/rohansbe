@@ -1,13 +1,13 @@
 const express = require('express');
-const sql = require('../config/db');
+const pool = require('../config/db');
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
 // Get all sliders (public)
 router.get('/', async (req, res) => {
   try {
-    const sliders = await sql`SELECT * FROM sliders ORDER BY id DESC`;
-    const formattedSliders = sliders.map(s => ({
+    const result = await pool.query('SELECT * FROM sliders ORDER BY id DESC');
+    const formattedSliders = result.rows.map(s => ({
       id: s.id,
       imageUrl: s.image_url,
       title: s.title,
@@ -32,16 +32,15 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json({ success: false, error: 'imageUrl is required' });
     }
     
-    const result = await sql`
-      INSERT INTO sliders (image_url, title, description)
-      VALUES (${finalImageUrl}, ${title || null}, ${description || null})
-      RETURNING *
-    `;
+    const result = await pool.query(
+      'INSERT INTO sliders (image_url, title, description) VALUES ($1, $2, $3) RETURNING *',
+      [finalImageUrl, title || null, description || null]
+    );
     const slider = {
-      id: result[0].id,
-      imageUrl: result[0].image_url,
-      title: result[0].title,
-      description: result[0].description
+      id: result.rows[0].id,
+      imageUrl: result.rows[0].image_url,
+      title: result.rows[0].title,
+      description: result.rows[0].description
     };
     res.json({ success: true, slider });
   } catch (error) {
@@ -57,17 +56,15 @@ router.put('/:id', authMiddleware, async (req, res) => {
     const { image_url, imageUrl, image, title, description } = req.body;
     const finalImageUrl = image_url || imageUrl || image;
     
-    const result = await sql`
-      UPDATE sliders 
-      SET image_url = ${finalImageUrl}, title = ${title || null}, description = ${description || null}
-      WHERE id = ${id}
-      RETURNING *
-    `;
+    const result = await pool.query(
+      'UPDATE sliders SET image_url = $1, title = $2, description = $3 WHERE id = $4 RETURNING *',
+      [finalImageUrl, title || null, description || null, id]
+    );
     const slider = {
-      id: result[0].id,
-      imageUrl: result[0].image_url,
-      title: result[0].title,
-      description: result[0].description
+      id: result.rows[0].id,
+      imageUrl: result.rows[0].image_url,
+      title: result.rows[0].title,
+      description: result.rows[0].description
     };
     res.json({ success: true, slider });
   } catch (error) {
@@ -79,7 +76,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    await sql`DELETE FROM sliders WHERE id = ${id}`;
+    await pool.query('DELETE FROM sliders WHERE id = $1', [id]);
     res.json({ success: true, message: 'Slider deleted' });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
