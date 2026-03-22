@@ -13,8 +13,10 @@ CREATE TABLE products (
   category VARCHAR(100) NOT NULL,
   grams JSONB NOT NULL,
   prices JSONB NOT NULL,
+  original_prices JSONB DEFAULT '{}',
   description TEXT NOT NULL,
   images JSONB NOT NULL,
+  tag VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
