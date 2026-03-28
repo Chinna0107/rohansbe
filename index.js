@@ -17,7 +17,7 @@ app.use(
       // // "http://localhost:3000",
       // "https://cmsupermart.com",
       // "https://cmsupermart.vercel.app",
-      "https://thealphazone.vercel.app"
+      "https://thealphazone.in"
     ],
     credentials: true,
   })
