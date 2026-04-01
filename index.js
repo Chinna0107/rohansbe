@@ -5,6 +5,7 @@ const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const sliderRoutes = require('./routes/sliderRoutes');
 const tagRoutes = require('./routes/tagRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +28,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/sliders', sliderRoutes);
 app.use('/api/tags', tagRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to CMBE API' });

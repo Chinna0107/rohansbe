@@ -29,6 +29,24 @@ CREATE TABLE sliders (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Orders table
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY,
+  customer JSONB NOT NULL,
+  items JSONB NOT NULL,
+  subtotal NUMERIC(10,2) NOT NULL,
+  total_savings NUMERIC(10,2) DEFAULT 0,
+  payment_method VARCHAR(50) NOT NULL,
+  payment_status VARCHAR(50) DEFAULT 'pending',
+  order_status VARCHAR(50) DEFAULT 'pending',
+  razorpay_payment_id VARCHAR(255),
+  razorpay_order_id VARCHAR(255),
+  razorpay_signature VARCHAR(255),
+  order_date DATE DEFAULT CURRENT_DATE,
+  order_time TIME DEFAULT CURRENT_TIME,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Index for faster email lookups
 CREATE INDEX idx_users_email ON users(email);
 
