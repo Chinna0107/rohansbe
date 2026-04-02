@@ -17,6 +17,7 @@ CREATE TABLE products (
   description TEXT NOT NULL,
   images JSONB NOT NULL,
   tag VARCHAR(50),
+  gender VARCHAR(20),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
