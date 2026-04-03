@@ -18,6 +18,8 @@ CREATE TABLE products (
   images JSONB NOT NULL,
   tag VARCHAR(50),
   gender VARCHAR(20),
+  colors JSONB DEFAULT '[]',
+  style_tags JSONB DEFAULT '[]',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -37,6 +39,9 @@ CREATE TABLE orders (
   items JSONB NOT NULL,
   subtotal NUMERIC(10,2) NOT NULL,
   total_savings NUMERIC(10,2) DEFAULT 0,
+  coupon_code VARCHAR(50),
+  coupon_discount NUMERIC(10,2) DEFAULT 0,
+  final_total NUMERIC(10,2),
   payment_method VARCHAR(50) NOT NULL,
   payment_status VARCHAR(50) DEFAULT 'pending',
   order_status VARCHAR(50) DEFAULT 'pending',
