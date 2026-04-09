@@ -1,7 +1,15 @@
 const express = require('express');
 const pool = require('../config/db');
 const authMiddleware = require('../middleware/auth');
+const redis = require('../config/redis');
 const router = express.Router();
+
+const CACHE_KEY = 'products:all';
+const CACHE_TTL = 300; // 5 minutes
+
+const invalidateCache = async () => {
+  try { await redis.del(CACHE_KEY); } catch { /* silent */ }
+};
 
 const parse = (val, fallback) => {
   if (!val) return fallback;
@@ -22,8 +30,18 @@ const mapProduct = (p) => ({
 // Get all products (public)
 router.get('/', async (req, res) => {
   try {
+    // try cache first
+    try {
+      const cached = await redis.get(CACHE_KEY);
+      if (cached) return res.json({ success: true, products: JSON.parse(cached), fromCache: true });
+    } catch { /* Redis unavailable — fall through to DB */ }
+
     const result = await pool.query('SELECT * FROM products ORDER BY id DESC');
     const products = result.rows.map(mapProduct);
+
+    // store in cache
+    try { await redis.setex(CACHE_KEY, CACHE_TTL, JSON.stringify(products)); } catch { /* silent */ }
+
     res.json({ success: true, products });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -42,6 +60,7 @@ router.post('/', authMiddleware, async (req, res) => {
       [name, category, JSON.stringify(finalGrams), JSON.stringify(finalPrices), JSON.stringify(originalPrices || {}), description, JSON.stringify(images || []), tag || null, gender || null, JSON.stringify(colors || []), JSON.stringify(styleTags || [])]
     );
     const product = mapProduct(result.rows[0]);
+    await invalidateCache();
     res.json({ success: true, product });
   } catch (error) {
     console.error('Error adding product:', error);
@@ -62,6 +81,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       [name, category, JSON.stringify(finalGrams), JSON.stringify(finalPrices), JSON.stringify(originalPrices || {}), description, JSON.stringify(images || []), tag || null, gender || null, JSON.stringify(colors || []), JSON.stringify(styleTags || []), id]
     );
     const product = mapProduct(result.rows[0]);
+    await invalidateCache();
     res.json({ success: true, product });
   } catch (error) {
     console.error('Error updating product:', error);
@@ -115,6 +135,7 @@ router.patch('/:id/stock', async (req, res) => {
       [JSON.stringify(colors), id]
     );
     res.json({ success: true, product: mapProduct(updated.rows[0]) });
+    await invalidateCache();
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -125,6 +146,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     await pool.query('DELETE FROM products WHERE id = $1', [id]);
+    await invalidateCache();
     res.json({ success: true, message: 'Product deleted' });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
