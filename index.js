@@ -20,6 +20,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "https://house-of-ramya.vercel.app",
       // "http://localhost:5174",
       // // "http://localhost:3000",
       // "https://cmsupermart.com",
