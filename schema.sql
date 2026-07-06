@@ -2,7 +2,14 @@
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
+  password VARCHAR(255),
+  name VARCHAR(255),
+  phone VARCHAR(20),
+  google_id VARCHAR(255),
+  otp VARCHAR(10),
+  otp_expiry TIMESTAMP,
+  addresses JSONB DEFAULT '[]',
+  wishlist JSONB DEFAULT '[]',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -48,6 +55,11 @@ CREATE TABLE orders (
   razorpay_payment_id VARCHAR(255),
   razorpay_order_id VARCHAR(255),
   razorpay_signature VARCHAR(255),
+  cancel_reason TEXT,
+  return_reason TEXT,
+  return_status VARCHAR(50),
+  tracking_id VARCHAR(100),
+  tracking_url VARCHAR(255),
   order_date DATE DEFAULT CURRENT_DATE,
   order_time TIME DEFAULT CURRENT_TIME,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -62,3 +74,27 @@ CREATE INDEX idx_products_category ON products(category);
 -- Insert a user
 INSERT INTO users (email, password) 
 VALUES ('user@example.com', 'password123');
+
+-- Coupons table
+CREATE TABLE coupons (
+  id SERIAL PRIMARY KEY,
+  code VARCHAR(50) UNIQUE NOT NULL,
+  type VARCHAR(20) NOT NULL,
+  discount NUMERIC(10,2) NOT NULL,
+  min_order NUMERIC(10,2) DEFAULT 0,
+  max_uses INTEGER,
+  used_count INTEGER DEFAULT 0,
+  expires_at TIMESTAMP,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Coupon uses table
+CREATE TABLE coupon_uses (
+  id SERIAL PRIMARY KEY,
+  coupon_code VARCHAR(50) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  order_id VARCHAR(100),
+  used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(coupon_code, phone)
+);

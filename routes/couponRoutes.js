@@ -80,6 +80,21 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
+// Update coupon
+router.put('/:id', authMiddleware, async (req, res) => {
+  const { code, type, discount, min_order, max_uses, expires_at } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE coupons SET code=$1, type=$2, discount=$3, min_order=$4, max_uses=$5, expires_at=$6 WHERE id=$7 RETURNING *',
+      [code?.toUpperCase(), type, discount, min_order || 0, max_uses || null, expires_at || null, req.params.id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Coupon not found' });
+    res.json({ success: true, coupon: result.rows[0] });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
 // Toggle active/inactive
 router.patch('/:id/toggle', authMiddleware, async (req, res) => {
   try {
