@@ -98,3 +98,10 @@ CREATE TABLE coupon_uses (
   used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(coupon_code, phone)
 );
+
+-- Settings table
+CREATE TABLE settings (
+  key VARCHAR(255) PRIMARY KEY,
+  value TEXT
+);
+

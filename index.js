@@ -12,6 +12,7 @@ const customerRoutes = require('./routes/customerRoutes');
 const customerOrderRoutes = require('./routes/customerOrderRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const settingRoutes = require('./routes/settingRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,6 +43,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/settings', settingRoutes);
 
 // Auth Routes
 app.use('/api/auth', authRoutes);
