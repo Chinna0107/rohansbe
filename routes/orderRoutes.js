@@ -3,6 +3,7 @@ const pool = require('../config/db');
 const authMiddleware = require('../middleware/auth');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const { sendEmail } = require('../config/mailer');
 const router = express.Router();
 
 const razorpay = new Razorpay({
@@ -110,7 +111,40 @@ router.post('/', async (req, res) => {
         time || null,
       ]
     );
-    res.json({ success: true, orderId: result.rows[0].id });
+    const orderId = result.rows[0].id;
+
+    // Send email confirmations asynchronously
+    const customerEmail = customer?.email;
+    const adminEmail = process.env.ADMIN_EMAIL || 'thehouseoframya@gmail.com';
+
+    if (customerEmail) {
+      const emailHtml = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+          <h2 style="color: #7A2230;">Order Confirmation</h2>
+          <p>Hi ${customer.name || 'Customer'},</p>
+          <p>Thank you for shopping with House of Ramya! Your order <strong>#${orderId}</strong> has been successfully placed.</p>
+          <p><strong>Total Amount:</strong> ₹${finalTotal || subtotal}</p>
+          <p>We will notify you once your order is dispatched.</p>
+          <p>Warm regards,<br>House of Ramya Team</p>
+        </div>
+      `;
+      sendEmail(customerEmail, `Order Confirmation - #${orderId}`, 'Your order has been placed.', emailHtml).catch(console.error);
+    }
+
+    const adminHtml = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #7A2230;">New Order Alert</h2>
+        <p>A new order <strong>#${orderId}</strong> has been placed.</p>
+        <p><strong>Customer:</strong> ${customer?.name || 'N/A'}</p>
+        <p><strong>Email:</strong> ${customerEmail || 'N/A'}</p>
+        <p><strong>Phone:</strong> ${customer?.phone || 'N/A'}</p>
+        <p><strong>Total Amount:</strong> ₹${finalTotal || subtotal}</p>
+        <p>Please check the admin dashboard for details.</p>
+      </div>
+    `;
+    sendEmail(adminEmail, `New Order Received - #${orderId}`, 'New order received.', adminHtml).catch(console.error);
+
+    res.json({ success: true, orderId });
   } catch (error) {
     console.error('Error saving order:', error);
     res.status(500).json({ success: false, error: error.message });
