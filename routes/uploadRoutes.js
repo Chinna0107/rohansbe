@@ -22,7 +22,7 @@ router.post('/', authMiddleware, upload.single('image'), (req, res) => {
   }
 
   const uploadStream = cloudinary.uploader.upload_stream(
-    { folder: 'house-of-ramya' },
+    { folder: 'house-of-ramya', resource_type: 'auto' },
     (error, result) => {
       if (error) {
         console.error('Cloudinary upload error:', error);

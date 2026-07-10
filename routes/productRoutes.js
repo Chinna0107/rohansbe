@@ -27,6 +27,7 @@ const mapProduct = (p) => ({
   gender: p.gender || null,
   washing_instructions: p.washing_instructions || '',
   festiveSeason: p.festive_season || false,
+  videoUrl: p.video_url || '',
 });
 
 // Get all products (public)
@@ -53,13 +54,13 @@ router.get('/', async (req, res) => {
 // Add product (protected)
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { name, category, grams, prices, originalPrices, price, description, images, tag, gender, colors, styleTags, washingInstructions, festiveSeason } = req.body;
+    const { name, category, grams, prices, originalPrices, price, description, images, tag, gender, colors, styleTags, washingInstructions, festiveSeason, videoUrl } = req.body;
     const finalGrams = Array.isArray(grams) ? grams : [grams];
     const finalPrices = prices || { [grams]: price };
     
     const result = await pool.query(
-      'INSERT INTO products (name, category, grams, prices, original_prices, description, images, tag, gender, colors, style_tags, washing_instructions, festive_season) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *',
-      [name, category, JSON.stringify(finalGrams), JSON.stringify(finalPrices), JSON.stringify(originalPrices || {}), description, JSON.stringify(images || []), tag || null, gender || null, JSON.stringify(colors || []), JSON.stringify(styleTags || []), washingInstructions || '', festiveSeason || false]
+      'INSERT INTO products (name, category, grams, prices, original_prices, description, images, tag, gender, colors, style_tags, washing_instructions, festive_season, video_url) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *',
+      [name, category, JSON.stringify(finalGrams), JSON.stringify(finalPrices), JSON.stringify(originalPrices || {}), description, JSON.stringify(images || []), tag || null, gender || null, JSON.stringify(colors || []), JSON.stringify(styleTags || []), washingInstructions || '', festiveSeason || false, videoUrl || null]
     );
     const product = mapProduct(result.rows[0]);
     await invalidateCache();
@@ -74,13 +75,13 @@ router.post('/', authMiddleware, async (req, res) => {
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, category, grams, prices, originalPrices, price, description, images, tag, gender, colors, styleTags, washingInstructions, festiveSeason } = req.body;
+    const { name, category, grams, prices, originalPrices, price, description, images, tag, gender, colors, styleTags, washingInstructions, festiveSeason, videoUrl } = req.body;
     const finalGrams = Array.isArray(grams) ? grams : [grams];
     const finalPrices = prices || { [grams]: price };
     
     const result = await pool.query(
-      'UPDATE products SET name=$1, category=$2, grams=$3, prices=$4, original_prices=$5, description=$6, images=$7, tag=$8, gender=$9, colors=$10, style_tags=$11, washing_instructions=$12, festive_season=$13 WHERE id=$14 RETURNING *',
-      [name, category, JSON.stringify(finalGrams), JSON.stringify(finalPrices), JSON.stringify(originalPrices || {}), description, JSON.stringify(images || []), tag || null, gender || null, JSON.stringify(colors || []), JSON.stringify(styleTags || []), washingInstructions || '', festiveSeason || false, id]
+      'UPDATE products SET name=$1, category=$2, grams=$3, prices=$4, original_prices=$5, description=$6, images=$7, tag=$8, gender=$9, colors=$10, style_tags=$11, washing_instructions=$12, festive_season=$13, video_url=$14 WHERE id=$15 RETURNING *',
+      [name, category, JSON.stringify(finalGrams), JSON.stringify(finalPrices), JSON.stringify(originalPrices || {}), description, JSON.stringify(images || []), tag || null, gender || null, JSON.stringify(colors || []), JSON.stringify(styleTags || []), washingInstructions || '', festiveSeason || false, videoUrl || null, id]
     );
     const product = mapProduct(result.rows[0]);
     await invalidateCache();
