@@ -21,14 +21,10 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      // "https://house-of-ramya.vercel.app",
-      // "http://localhost:5174",
-      // // "http://localhost:3000",
-      // "https://cmsupermart.com",
-      // "https://cmsupermart.vercel.app",
-      // "https://houseoframya.in",
-      // "https://houseoframya.com",
-      "https://rohans-five.vercel.app"
+      "http://localhost:5174",
+      "http://localhost:3000",
+      "https://rohans-five.vercel.app",
+      "https://rohansbe.vercel.app"
     ],
     credentials: true,
   })
@@ -52,7 +48,7 @@ app.use('/api/customer', customerRoutes);
 app.use('/api/customer/orders', customerOrderRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to CMBE API' });
+  res.json({ message: 'Welcome to ROHANS MATCHING CENTRE API' });
 });
 
 app.listen(PORT, () => {
