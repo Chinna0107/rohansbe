@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 // Create category (admin only)
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { name, description, styles, sizes, is_meters } = req.body;
+    const { name, description, styles, sizes, is_meters, image_url } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Category name is required' });
 
     // Ensure styles and sizes are valid JSON strings or arrays
@@ -25,10 +25,37 @@ router.post('/', authMiddleware, async (req, res) => {
     const isMetersBool = Boolean(is_meters);
 
     const result = await pool.query(
-      'INSERT INTO categories (name, description, styles, sizes, is_meters) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [name, description, stylesJson, sizesJson, isMetersBool]
+      'INSERT INTO categories (name, description, styles, sizes, is_meters, image_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [name, description, stylesJson, sizesJson, isMetersBool, image_url]
     );
     res.status(201).json({ success: true, category: result.rows[0] });
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(400).json({ success: false, message: 'Category already exists' });
+    }
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update category (admin only)
+router.put('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { name, description, styles, sizes, is_meters, image_url } = req.body;
+    if (!name) return res.status(400).json({ success: false, message: 'Category name is required' });
+
+    const stylesJson = Array.isArray(styles) ? JSON.stringify(styles) : '[]';
+    const sizesJson = Array.isArray(sizes) ? JSON.stringify(sizes) : '[]';
+    const isMetersBool = Boolean(is_meters);
+
+    const result = await pool.query(
+      'UPDATE categories SET name = $1, description = $2, styles = $3, sizes = $4, is_meters = $5, image_url = $6 WHERE id = $7 RETURNING *',
+      [name, description, stylesJson, sizesJson, isMetersBool, image_url, req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+    res.json({ success: true, category: result.rows[0] });
   } catch (error) {
     if (error.code === '23505') {
       return res.status(400).json({ success: false, message: 'Category already exists' });
