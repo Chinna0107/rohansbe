@@ -122,10 +122,10 @@ router.post('/', async (req, res) => {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
           <h2 style="color: #7A2230;">Order Confirmation</h2>
           <p>Hi ${customer.name || 'Customer'},</p>
-          <p>Thank you for shopping with House of Ramya! Your order <strong>#${orderId}</strong> has been successfully placed.</p>
+          <p>Thank you for shopping with Rohans Matching Center! Your order <strong>#${orderId}</strong> has been successfully placed.</p>
           <p><strong>Total Amount:</strong> ₹${finalTotal || subtotal}</p>
           <p>We will notify you once your order is dispatched.</p>
-          <p>Warm regards,<br>House of Ramya Team</p>
+          <p>Warm regards,<br>Rohans Matching Center Team</p>
         </div>
       `;
       sendEmail(customerEmail, `Order Confirmation - #${orderId}`, 'Your order has been placed.', emailHtml).catch(console.error);
