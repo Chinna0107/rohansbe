@@ -169,6 +169,10 @@ const mapOrder = (o) => ({
   createdAt: o.created_at,
   orderDate: o.order_date,
   orderTime: o.order_time,
+  shiprocket_order_id: o.shiprocket_order_id || null,
+  shipment_id: o.shipment_id || null,
+  awb_code: o.awb_code || null,
+  courier_name: o.courier_name || null,
 });
 
 // Get all orders (admin only)

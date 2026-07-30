@@ -42,8 +42,9 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
+    const isAdmin = user.email === process.env.ADMIN_EMAIL;
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { id: user.id, email: user.email, isAdmin },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -52,9 +53,11 @@ router.post('/login', async (req, res) => {
       success: true,
       message: 'Login successful',
       token,
+      isAdmin,
       user: {
         id: user.id,
-        email: user.email
+        email: user.email,
+        isAdmin
       }
     });
   } catch (err) {
