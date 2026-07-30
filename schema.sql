@@ -105,3 +105,15 @@ CREATE TABLE settings (
   value TEXT
 );
 
+-- Categories table
+CREATE TABLE categories (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) UNIQUE NOT NULL,
+  description TEXT,
+  styles JSONB DEFAULT '[]',
+  sizes JSONB DEFAULT '[]',
+  is_meters BOOLEAN DEFAULT false,
+  image_url TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
